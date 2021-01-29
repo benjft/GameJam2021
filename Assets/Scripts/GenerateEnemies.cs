@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GenerateEnemies : MonoBehaviour
 {
+    // patrol
+    // pursuit
+    // search
     public static void Generate(Vector2Int Space, int count)
     {
         for (int i = 0; i < count; i++)
