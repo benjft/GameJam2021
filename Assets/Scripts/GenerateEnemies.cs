@@ -6,11 +6,12 @@ public class GenerateEnemies : MonoBehaviour
 {
     public static void Generate(Vector2Int Space, int count)
     {
-        var enemy = new GameObject("Enemy", typeof(SpriteRenderer));
-        enemy = GameAssets.instance.Enemy;
-        Instantiate (Resources.Load("Enemy") as GameObject);
-        Debug.Log("hello");
-        //second.name = "real";
-        Debug.Log("hello2");
+        for (int i = 0; i < count; i++)
+        {
+            var enemy = Resources.Load("Prefabs/Enemy") as GameObject;
+            enemy.transform.position = new Vector3(Random.Range(0, Space.x), Random.Range(0, Space.y), 0);
+            enemy.name = $"enemyy {i}";
+            Instantiate(enemy);
+        }
     }
 }
