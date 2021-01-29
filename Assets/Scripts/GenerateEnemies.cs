@@ -7,14 +7,14 @@ public class GenerateEnemies : MonoBehaviour
     // patrol
     // pursuit
     // search
-    public static void Generate(Vector2Int Space, int count)
+    public static void Generate(Vector2Int StartPosition, int id)
     {
-        for (int i = 0; i < count; i++)
-        {
-            var enemy = Resources.Load("Prefabs/Enemy") as GameObject;
-            enemy.transform.position = new Vector3(Random.Range(0, Space.x), Random.Range(0, Space.y), 0);
-            enemy.name = $"enemyy {i}";
-            Instantiate(enemy);
-        }
+        var enemy = Resources.Load("Prefabs/Enemy") as GameObject;
+        enemy.name = $"enemy {id}";
+        AiController obj = enemy.GetComponent<AiController>();
+        Debug.Log("here1");
+        //obj.Position = new Vector2(1, 3);
+        Debug.Log("here2");
+        Instantiate(obj);
     }
 }
