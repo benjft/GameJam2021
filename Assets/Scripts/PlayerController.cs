@@ -8,10 +8,10 @@ public class PlayerController : MonoBehaviour
 
     public float speed = 3.0f;
 
-    public int maxHealth = 5;
+    public int maxWill = 5;
 
-    public int health { get { return currentHealth; } }
-    int currentHealth;
+    public int health { get { return currentWill; } }
+    int currentWill;
 
     public float timeInvincible = 2.0f;
     bool isInvincible;
@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour
         rigidbody2d = GetComponent<Rigidbody2D>();
         //animator = GetComponent<Animator>();
 
-        currentHealth = maxHealth;
+        currentWill = maxWill;
     }
 
     // Update is called once per frame
@@ -69,7 +69,7 @@ public class PlayerController : MonoBehaviour
         rigidbody2d.MovePosition(position);
     }
 
-    public void ChangeHealth(int amount)
+    public void ChangeWill(int amount)
     {
         if (amount < 0)
         {
@@ -82,7 +82,7 @@ public class PlayerController : MonoBehaviour
             invincibleTimer = timeInvincible;
         }
 
-        currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
-        Debug.Log(currentHealth + "/" + maxHealth);
+        currentWill = Mathf.Clamp(currentWill + amount, 0, maxWill);
+        Debug.Log(currentWill + "/" + maxWill);
     }
 }

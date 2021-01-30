@@ -25,13 +25,17 @@ public class AiController : MonoBehaviour
         rigidbody2d = GetComponent<Rigidbody2D>();
         Direction = (float)Random.Range(0f, 1f); // random direction up or down random range is range
         if (Direction >= 0.5f)
+        {
             vertical = true;
+            Debug.Log("Vertical");
+        }
 
         else
+        {
             vertical = false;
+            Debug.Log("Horizontal");
+        }
 
-        
-        Debug.Log(Direction);
     }
 
     void Update()
@@ -44,6 +48,17 @@ public class AiController : MonoBehaviour
             timer = changeTime;
         }
     }
+
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        PlayerController player = other.gameObject.GetComponent<PlayerController>();
+
+        if (player != null)
+        {
+            player.ChangeWill(-1);
+        }
+    }
+
     void FixedUpdate()
     {
         Vector2 position = rigidbody2d.position;
