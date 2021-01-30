@@ -12,18 +12,24 @@ public class AiController : MonoBehaviour
     
     Rigidbody2D rigidbody2d; // new added to remove warning
 
+    
+
     float timer;
     int direction = 1;
     
 
     private float Direction;
-    private bool vertical;
-
+    private bool vertical; // vertical has been irrelevent
+    private AiPath aiPath;
+    
     void Start()
     {
+        aiPath = new AiPath(Position, "Patrol", new Vector2[] { new Vector2(5, 5), new Vector2(2, 2) });
         timer = changeTime;
         rigidbody2d = GetComponent<Rigidbody2D>();
         Direction = (float)Random.Range(0f, 1f); // random direction up or down random range is range
+
+        
         if (Direction >= 0.5f)
         {
             vertical = true;
@@ -40,42 +46,34 @@ public class AiController : MonoBehaviour
 
     void Update()
     {
-        timer -= Time.deltaTime;
 
+        
+        timer -= Time.deltaTime;
         if (timer < 0)
         {
             direction = -direction;
             timer = changeTime;
+            //CheckDetection()
         }
     }
 
     void OnCollisionEnter2D(Collision2D other)
     {
         PlayerController player = other.gameObject.GetComponent<PlayerController>();
-
+        //////////////////////////////use this of detection ^^^^^^^^^^^^^
         if (player != null)
         {
             player.ChangeWill(-1);
+            
         }
     }
 
     void FixedUpdate()
     {
-        Vector2 position = rigidbody2d.position;
-
-        if (vertical)
-        {
-            position.y += Time.deltaTime * speed * direction;
-            //animator.SetFloat("Move X", 0);
-            //animator.SetFloat("Move Y", direction);
-        }
-        else
-        {
-            position.x += Time.deltaTime * speed * direction;
-            //animator.SetFloat("Move X", direction);
-            //animator.SetFloat("Move Y", 0);
-        }
-
-        rigidbody2d.MovePosition(position);
+        aiPath.Move(speed);
+        
+        rigidbody2d.MovePosition(aiPath.Position);
     }
+
+
 }

@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
 
     public int maxWill = 5;
 
-    public int health { get { return currentWill; } }
+    public int Will { get { return currentWill; } }
     int currentWill;
 
     public float timeInvincible = 2.0f;
@@ -63,8 +63,8 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         Vector2 position = rigidbody2d.position;
-        position.x = position.x + speed * horizontal * Time.deltaTime;
-        position.y = position.y + speed * vertical * Time.deltaTime;
+        position.x += speed * horizontal * Time.deltaTime;
+        position.y += speed * vertical * Time.deltaTime;
 
         rigidbody2d.MovePosition(position);
     }

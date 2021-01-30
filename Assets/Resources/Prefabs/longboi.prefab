@@ -1151,7 +1151,7 @@ GameObject:
   - component: {fileID: 6145247976670293852}
   - component: {fileID: 9151166909937968267}
   m_Layer: 0
-  m_Name: Body
+  m_Name: longboi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1192,6 +1192,7 @@ MonoBehaviour:
   Position: {x: 0, y: 0}
   Patrol: []
   changeTime: 3
+  Detection: 0
 --- !u!212 &873380755428457849
 SpriteRenderer:
   m_ObjectHideFlags: 0

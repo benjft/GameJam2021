@@ -716,6 +716,7 @@ MonoBehaviour:
   Position: {x: 0, y: 0}
   Patrol: []
   changeTime: 3
+  Detection: 0
 --- !u!212 &7911091251072444992
 SpriteRenderer:
   m_ObjectHideFlags: 0
