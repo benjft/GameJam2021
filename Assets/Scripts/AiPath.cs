@@ -17,6 +17,8 @@ public class AiPath
     }
     public void Move(float speed)
     {
+        Debug.Log($"pos: {Position}");
+        foreach (var val in Pathing) Debug.Log($"val: {val}");
         if (PathState == "patrol") patrol(speed);
         else if (PathState == "pursuit") pursuit(speed);
     }

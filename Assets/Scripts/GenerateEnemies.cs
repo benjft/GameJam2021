@@ -7,7 +7,7 @@ public class GenerateEnemies : MonoBehaviour
     // patrol
     // pursuit
     // search
-    public static void Generate(Vector2Int StartPosition, int id)
+    public static void Generate(Vector2 StartPosition, int id)
     {
         var enemy = Resources.Load("Prefabs/darknessF") as GameObject;
         enemy.name = $"enemy {id}";

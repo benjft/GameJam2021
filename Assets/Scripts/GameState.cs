@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameState : MonoBehaviour
 {
-    List<Node> Map;
+    NodeMap Map;
     void Start()
     {
         //GenerateEnemies.Generate(new Vector2Int(4,4),3);
@@ -77,6 +77,7 @@ public class GameState : MonoBehaviour
             Debug.Log($"pos: {item.GameObject.x}/{item.GameObject.y}");
         }
         Debug.Log($"pos: {nodes[5].GameObject.x}/{nodes[5].GameObject.y}");
+        GenerateEnemies.Generate(new Vector2(0, 0), 1);
         //ai.Move(2f);
         //Debug.Log($"pos: {ai.Position} x: {ai.Position.x} y: {ai.Position.y}");
     }
