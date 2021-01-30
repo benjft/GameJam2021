@@ -5,6 +5,7 @@ using UnityEngine;
 public class AiPath
 {
     public Vector2 Position { get; private set; }
+    public Vector2 PlayerLastSeen { get; private set; }
     public string PathState { get; set; }
     public Vector2[] Pathing { get; private set; }
     private int pathi = 0;
@@ -16,18 +17,52 @@ public class AiPath
     }
     public void Move(float speed)
     {
-        if (PathState == "patrol") Patrol(speed);
+        if (PathState == "patrol") patrol(speed);
+        else if (PathState == "pursuit") pursuit(speed);
     }
-    private void Patrol(float speed)
+    private void patrol(float speed)
     {
-        if (Position.x < Pathing[pathi].x) Position = new Vector2(Position.x + speed, Position.y);
-        else if(Position.x > Pathing[pathi].x) Position = new Vector2(Position.x - speed, Position.y);
-        if (Position.y < Pathing[pathi].y) Position = new Vector2(Position.x, Position.y + speed);
-        else if(Position.y > Pathing[pathi].y) Position = new Vector2(Position.x, Position.y - speed);
-        if (Position.x == Pathing[pathi].x && Position.y == Pathing[pathi].y)
+        // increase position
+        var newPos = new Vector2(setVal(speed, Position.x, Pathing[pathi].x), setVal(speed, Position.y, Pathing[pathi].y));
+        // if it has made it to the path
+        if (newPos == Pathing[pathi])
         {
+            // increase the path
             pathi++;
+            // reset to starting path position
             if (pathi == Pathing.Length) pathi = 0;
         }
+        Position = newPos;
+    }
+    private void pursuit(float speed)
+    {
+        Position = new Vector2(setVal(speed, Position.x, PlayerLastSeen.x), setVal(speed, Position.y, PlayerLastSeen.y));
+    }
+    private float setVal(float speed, float xy, float comp)
+    {
+        // increase/decrease the x/y by the speed unless it goes beyond the bounds of the path position
+        if (xy < comp)
+        {
+            if (xy + speed > comp)
+            {
+                return comp;
+            }
+            else
+            {
+                return xy + speed;
+            }
+        }
+        if (xy > comp)
+        {
+            if (xy - speed < comp)
+            {
+                return comp;
+            }
+            else
+            {
+                return xy - speed;
+            }
+        }
+        return xy;
     }
 }
