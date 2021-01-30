@@ -43,9 +43,10 @@ public class AiController : MonoBehaviour
         //////////////////////////////use this of detection ^^^^^^^^^^^^^
         if (player != null)
         {
-            player.ChangeWill(-1);
-            
+            player.ChangeWill(-3);
+            Destroy(gameObject);
         }
+
     }
 
     void FixedUpdate()
