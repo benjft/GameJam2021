@@ -7,13 +7,20 @@ public class AiPath
     public Vector2 Position { get; private set; }
     public Vector2Int PlayerLastSeen { get; private set; }
     public string PathState { get; set; }
-    public List<Node> PatrolPoints { get; private set; }
+    public List<Vector2Int> PatrolPoints { get; private set; }
+    private Vector2Int destination;
     private int patrolPointsi = 1;
     public List<Vector2Int> Path { get; private set; }
     private int pathPointsi = 1;
-    public AiPath(List<Node> patrolPoints, string pathState = "patrol")
+    //public AiPath(List<Node> patrolPoints, string pathState = "patrol")
+    //{
+    //    Position = patrolPoints[0].Position;
+    //    PathState = pathState;
+    //    PatrolPoints = patrolPoints;
+    //}
+    public AiPath(List<Vector2Int> patrolPoints, List<Vector2Int> Path, string pathState = "patrol")
     {
-        Position = patrolPoints[0].Position;
+        Position = patrolPoints[0];
         PathState = pathState;
         PatrolPoints = patrolPoints;
     }
@@ -24,17 +31,26 @@ public class AiPath
     }
     private void patrol(float speed)
     {
-        Debug.Log("enemy patrol");
         if(Path == null)
         {
-            pathPointsi = patrolPointsi + 1 == PatrolPoints.Count ? 0 : patrolPointsi + 1;
-            setPathPoints(PatrolPoints[patrolPointsi].Position,
-                patrolPointsi == PatrolPoints.Count ? PatrolPoints[patrolPointsi + 1].Position : 
-                PatrolPoints[0].Position);
+            var posAsInt = new Vector2Int((int)Position.x, (int)Position.y);
+            destination = PatrolPoints[patrolPointsi];
+            setPathPoints(posAsInt, destination);
+            patrolPointsi++;
+            if (patrolPointsi == PatrolPoints.Count) patrolPointsi = 0;
         }
         // increase position
-        var newPos = new Vector2(setVal(speed, Position.x, Path[pathPointsi].x), 
-            setVal(speed, Position.y, Path[pathPointsi].y));
+        Vector2 newPos = new Vector2(-1000,-1000);
+        // handle no movement situations
+        try
+        {
+            newPos = new Vector2(setVal(speed, Position.x, Path[pathPointsi].x),
+                setVal(speed, Position.y, Path[pathPointsi].y));
+        }
+        catch (System.Exception)
+        {
+            pathPointsi = 0;
+        }
         // if it has made it to the path
         if (newPos == Path[pathPointsi])
         {
@@ -77,14 +93,6 @@ public class AiPath
     }
     private void setPathPoints(Vector2Int from, Vector2Int to)
     {
-        var GridManagerObject = GameObject.FindWithTag("Map");
-        if (GridManagerObject != null)
-        {
-            var GridManager = GridManagerObject.GetComponent<GridManager>();
-            Debug.Log("getting enemy path");
-            Path = GridManager.NodeMap.FastestRoute($"{from}", $"{to}");
-            Debug.Log("enemy path obtained");
-            if (Path == null) throw new System.Exception($"Error with Node id {from} and {to}");
-        }
+        Path = GenerateEnemies.ObtainPath(from, to);
     }
 }

@@ -32,11 +32,17 @@ public class NodeMap
         var activeTiles = new List<Node>() { start };
         var checkedIds = new List<string>();
         var next = start;
-        Debug.Log("here");
         while (next.Position.x != finish.Position.x ||
             next.Position.y != finish.Position.y)
         {
-            next = activeTiles[0];
+            try
+            {
+                next = activeTiles[0];
+            }
+            catch (System.Exception)
+            {
+                return new List<Vector2Int>();
+            }
             for (int i = 1; i < activeTiles.Count; i++)
             {
                 if (activeTiles[i].HoristicMoveCost < next.HoristicMoveCost) 
@@ -54,11 +60,18 @@ public class NodeMap
             activeTiles.Remove(next);
         }
         var positions = new List<Vector2Int>();
-        do
+        try
         {
-            positions.Add(next.Position);
-            next = next.Parent;
-        } while (next.Parent != null);
+            do
+            {
+                positions.Insert(0,next.Position);
+                next = next.Parent;
+            } while (next.Parent != null);
+        }
+        catch (System.Exception)
+        {
+            Debug.Log("Stopping hang but can't work out why");
+        }
         return positions;
     }
     public List<Node> SelectRandomAvailableNodes()

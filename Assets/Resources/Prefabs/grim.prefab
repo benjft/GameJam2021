@@ -14,8 +14,6 @@ GameObject:
   - component: {fileID: 2654362441828364988}
   - component: {fileID: 560669490}
   - component: {fileID: 560669491}
-  - component: {fileID: 560669489}
-  - component: {fileID: 560669492}
   m_Layer: 0
   m_Name: grim
   m_TagString: Untagged
@@ -53,7 +51,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
-  Position: {x: 0, y: 0}
   Patrol: []
   changeTime: 3
 --- !u!212 &8266287659063234641
@@ -94,7 +91,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: 1
   m_Sprite: {fileID: -4799502379491266269, guid: ba3629272a835c649a9fdcb450103a63,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -173,30 +170,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 9.643875, y: 8.197562}
   m_EdgeRadius: 0
---- !u!114 &560669489
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 363950841254867689}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 665698db9fb7f4a4e9c92eb1093bb430, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &560669492
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 363950841254867689}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c68e15323098734b94df41e450cbba7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &488573439087519838
 GameObject:
   m_ObjectHideFlags: 0

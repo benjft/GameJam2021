@@ -90,6 +90,7 @@ public class GridManager : MonoBehaviour {
     void GenerateLevel() {
         var tileWall = Resources.Load<GameObject>("Tiles/TileWall");
         var tileFloor = Resources.Load<GameObject>("Tiles/TileFloor");
+        tileFloor.tag = "Floor";
         var tileStart = Resources.Load<GameObject>("Tiles/TileStart");
         var tileEnd = Resources.Load<GameObject>("Tiles/TileEnd");
         var maze = getMaze();
