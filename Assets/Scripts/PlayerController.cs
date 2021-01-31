@@ -96,6 +96,7 @@ public class PlayerController : MonoBehaviour
             Reveal();
         }
     }
+    public void Place(Vector2Int place) => rigidbody2d.MovePosition(place);
     void FixedUpdate()
     {
         Vector2 position = rigidbody2d.position;

@@ -61,7 +61,6 @@ public class DungeonGenerator : MonoBehaviour {
         map[startNode.X - minX, startNode.Y - minY] = 's';
         var endNode = nodes.Last();
         map[endNode.X - minX, endNode.Y - minY] = 'e';
-        
         return map;
     }
     
@@ -78,9 +77,12 @@ public class DungeonGenerator : MonoBehaviour {
 
         var tileWall = Resources.Load<GameObject>("Tiles/TileWall");
         var tileFloor = Resources.Load<GameObject>("Tiles/TileFloor");
+        tileFloor.tag = "Floor";
         var tileStart = Resources.Load<GameObject>("Tiles/TileStart");
+        tileStart.tag = "Start";
         var tileEnd = Resources.Load<GameObject>("Tiles/TileEnd");
-        
+        tileEnd.tag = "End";
+
         var cols = map.GetLength(0);
         var rows = map.GetLength(1);
         var scale = 1f;
@@ -107,6 +109,7 @@ public class DungeonGenerator : MonoBehaviour {
         var gridW = cols * scale;
         var gridH = rows * scale;
         transform.position = new Vector3(-gridW / 2, gridH / 2);
+        GameObject.FindGameObjectWithTag("Player").transform.position = GameObject.FindGameObjectWithTag("Start").transform.position;
     }
 }
 
