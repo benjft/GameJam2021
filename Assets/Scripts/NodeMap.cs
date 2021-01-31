@@ -4,18 +4,17 @@ using UnityEngine;
 
 public class NodeMap
 {
-    public List<Node> Nodes { get; set; }
-    public NodeMap(List<Node> nodes)
-    {
-        nodes = Nodes;
-    }
+    public Dictionary<string, Node> Nodes { get; set; }
+    public NodeMap() => Nodes = new Dictionary<string, Node>();
+    public NodeMap(Dictionary<string, Node> nodes) => Nodes = nodes;
     public List<Node> FastestRoute(Node start, Node finish)
     {
         start.SetDistance(finish);
         var activeTile = start;
         var visitedTiles = new List<Node>();
-        while (activeTile.GameObject.x != finish.GameObject.x ||
-            activeTile.GameObject.y != finish.GameObject.y)
+        //Debug.Log($"{activeTile.GameObject.transform.position.x} != {finish.GameObject.transform.position.x} + {activeTile.GameObject.transform.position.y} != {finish.GameObject.transform.position.y}");
+        while (activeTile.Position.x != finish.Position.x ||
+            activeTile.Position.y != finish.Position.y)
         {
             visitedTiles.Add(activeTile);
 
@@ -23,5 +22,71 @@ public class NodeMap
 
         }
         return visitedTiles;
+    }
+    public List<Vector2Int> FastestRoute(string startId, string finishId)
+    {
+        Node start, finish;
+        if (!Nodes.TryGetValue(startId, out start)) return null;
+        if (!Nodes.TryGetValue(finishId, out finish)) return null;
+        start.SetDistance(finish);
+        var activeTiles = new List<Node>() { start };
+        var checkedIds = new List<string>();
+        var next = start;
+        Debug.Log("here");
+        while (next.Position.x != finish.Position.x ||
+            next.Position.y != finish.Position.y)
+        {
+            next = activeTiles[0];
+            for (int i = 1; i < activeTiles.Count; i++)
+            {
+                if (activeTiles[i].HoristicMoveCost < next.HoristicMoveCost) 
+                    next = activeTiles[i];
+            }
+            var rel = relatedIds(next.Position, checkedIds);
+            for (int i = 0; i < rel.Count; i++)
+            {
+                Nodes[rel[i]].SetDistance(finish);
+                Nodes[rel[i]].MoveCost = next.MoveCost + 1;
+                Nodes[rel[i]].Parent = next;
+                activeTiles.Add(Nodes[rel[i]]);
+            }
+            checkedIds.Add($"{next.Position}");
+            activeTiles.Remove(next);
+        }
+        var positions = new List<Vector2Int>();
+        do
+        {
+            positions.Add(next.Position);
+            next = next.Parent;
+        } while (next.Parent != null);
+        return positions;
+    }
+    public List<Node> SelectRandomAvailableNodes()
+    {
+        var lst = new List<Node>();
+        for (int i = 0; i < 3; i++)
+        {
+            Node node;
+            do
+            {
+                var nom = new Vector2Int(Random.Range(-20, 20), Random.Range(-20, 20));
+                Nodes.TryGetValue($"{nom}", out node);
+            } while (node == null);
+            lst.Add(node);
+        }
+        return lst;
+    }
+    private List<string> relatedIds(Vector2Int position, List<string> checkedIds)
+    {
+        var lst = new List<string>();
+        if (Nodes.ContainsKey($"{new Vector2Int(position.x + 1, position.y)}") && !checkedIds.Contains($"{new Vector2Int(position.x + 1, position.y)}"))
+            lst.Add($"{new Vector2Int(position.x + 1, position.y)}");
+        if (Nodes.ContainsKey($"{new Vector2Int(position.x, position.y + 1)}") && !checkedIds.Contains($"{new Vector2Int(position.x, position.y + 1)}"))
+            lst.Add($"{new Vector2Int(position.x, position.y + 1)}");
+        if (Nodes.ContainsKey($"{new Vector2Int(position.x - 1, position.y)}") && !checkedIds.Contains($"{new Vector2Int(position.x - 1, position.y)}"))
+            lst.Add($"{new Vector2Int(position.x - 1, position.y)}");
+        if (Nodes.ContainsKey($"{new Vector2Int(position.x, position.y - 1)}") && !checkedIds.Contains($"{new Vector2Int(position.x, position.y - 1)}"))
+            lst.Add($"{new Vector2Int(position.x, position.y - 1)}");
+        return lst;
     }
 }

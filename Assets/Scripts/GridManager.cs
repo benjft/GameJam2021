@@ -11,24 +11,26 @@ public class GridManager : MonoBehaviour {
     public int rows = 50;
     public int cols = 50;
     public float scale = 1f;
-    
+    [Header("Node Data")]
+    public NodeMap NodeMap;
     bool[,] getMaze() {
         var tiles = new bool[cols, rows];
 
         var startX = (int) (Random.value * cols);
         var startY = (int) (Random.value * rows);
+        NodeMap = new NodeMap();
 
-
-        var path = new Stack<IntPair>();
-        var current = new IntPair(startX, startY);
+        var path = new Stack<Vector2Int>();
+        var current = new Vector2Int(startX, startY);
+        NodeMap.Nodes.Add($"{current}", new Node() { Position = current });
         while (current != null) {
             tiles[current.x, current.y] = true;
-            var valid = new List<IntPair>();
+            var valid = new List<Vector2Int>();
             if (current.x > 0 && !tiles[current.x - 1, current.y]) {
                 if ((current.x == 1 || !tiles[current.x - 2, current.y]) &&
                     (current.y == 0 || !tiles[current.x - 1, current.y - 1]) &&
                     (current.y == rows - 1 || !tiles[current.x - 1, current.y + 1])) {
-                    valid.Add(new IntPair(current.x - 1, current.y));
+                    valid.Add(new Vector2Int(current.x - 1, current.y));
                 }
             }
 
@@ -36,7 +38,7 @@ public class GridManager : MonoBehaviour {
                 if ((current.y == 1 || !tiles[current.x, current.y - 2]) &&
                     (current.x == 0 || !tiles[current.x - 1, current.y - 1]) &&
                     (current.x == cols - 1 || !tiles[current.x + 1, current.y - 1])) {
-                    valid.Add(new IntPair(current.x, current.y - 1));
+                    valid.Add(new Vector2Int(current.x, current.y - 1));
                 }
             }
 
@@ -44,7 +46,7 @@ public class GridManager : MonoBehaviour {
                 if ((current.x == cols - 2 || !tiles[current.x + 2, current.y]) &&
                     (current.y == 0 || !tiles[current.x + 1, current.y - 1]) &&
                     (current.y == rows - 1 || !tiles[current.x + 1, current.y + 1])) {
-                    valid.Add(new IntPair(current.x + 1, current.y));
+                    valid.Add(new Vector2Int(current.x + 1, current.y));
                 }
             }
 
@@ -52,7 +54,7 @@ public class GridManager : MonoBehaviour {
                 if ((current.y == rows - 2 || !tiles[current.x, current.y + 2]) &&
                     (current.x == 0 || !tiles[current.x - 1, current.y + 1]) &&
                     (current.x == cols - 1 || !tiles[current.x + 1, current.y + 1])) {
-                    valid.Add(new IntPair(current.x, current.y + 1));
+                    valid.Add(new Vector2Int(current.x, current.y + 1));
                 }
             }
 
@@ -60,25 +62,36 @@ public class GridManager : MonoBehaviour {
                 if (path.Count > 0) {
                     current = path.Pop();
                 } else {
-                    current = null;
+                    break;
                 }
                 continue;
             }
             
             path.Push(current);
-
-            current = valid[Random.Range(0, valid.Count)];
+            var temp = valid[Random.Range(0, valid.Count)];
+            NodeMap.Nodes.Add($"{temp}", new Node() { Position = temp });
+            setRelatedNodes($"{current}", $"{temp}");
+            current = temp;
         }
 
         return tiles;
-    }
 
+        void setRelatedNodes(string fromId, string toId)
+        {
+            //Debug.Log($"hereweare {NodeMap.Nodes.ContainsKey($"{toId}")}");
+            if (NodeMap.Nodes.ContainsKey($"{toId}"))
+            {
+                NodeMap.Nodes[toId].RelatedNodes.Add(NodeMap.Nodes[fromId]);
+                NodeMap.Nodes[fromId].RelatedNodes.Add(NodeMap.Nodes[toId]);
+            }
+
+        }
+    }
     void GenerateLevel() {
         var tileWall = Resources.Load<GameObject>("Tiles/TileWall");
         var tileFloor = Resources.Load<GameObject>("Tiles/TileFloor");
         var tileStart = Resources.Load<GameObject>("Tiles/TileStart");
         var tileEnd = Resources.Load<GameObject>("Tiles/TileEnd");
-
         var maze = getMaze();
         
         for (var row = 0; row < rows; row++) {
@@ -103,14 +116,7 @@ public class GridManager : MonoBehaviour {
     }
     
     void Start() {
+        NodeMap = new NodeMap();
         GenerateLevel();
-    }
-}
-
-internal class IntPair {
-    internal readonly int x, y;
-    internal IntPair(int x, int y) {
-        this.x = x;
-        this.y = y;
     }
 }

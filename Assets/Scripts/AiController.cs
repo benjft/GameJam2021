@@ -5,7 +5,6 @@ using UnityEngine;
 public class AiController : MonoBehaviour
 {
     public float speed = 0.3f;
-    public Vector2 Position = new Vector2(0,0);
     
     public List<Vector2> Patrol = new List<Vector2>();
     public float changeTime = 3.0f;
@@ -13,17 +12,17 @@ public class AiController : MonoBehaviour
     Rigidbody2D rigidbody2d; // new added to remove warning
 
     float timer;
-    int direction = 1;
     
-    private float Direction;
-    private AiPath aiPath;
-    
+    public AiPath aiPath { get; set; }
     void Start()
     {
-        aiPath = new AiPath(Position, "patrol", new Vector2[] { new Vector2(5, 5), new Vector2(2, 2), new Vector2(-7, 3), new Vector2(6, 9) });
-        timer = changeTime;
+        var GridManagerObject = GameObject.FindWithTag("Map");
+        if (GridManagerObject != null)
+        {
+            var GridManager = GridManagerObject.GetComponent<GridManager>();
+            aiPath = new AiPath(GridManager.NodeMap.SelectRandomAvailableNodes());
+        }
         rigidbody2d = GetComponent<Rigidbody2D>();
-        Direction = (float)Random.Range(0f, 1f); // random direction up or down random range is range
     }
 
     void Update()
@@ -31,7 +30,6 @@ public class AiController : MonoBehaviour
         timer -= Time.deltaTime;
         if (timer < 0)
         {
-            direction = -direction;
             timer = changeTime;
             //CheckDetection()
         }
@@ -47,12 +45,9 @@ public class AiController : MonoBehaviour
             
         }
     }
-
     void FixedUpdate()
     {
         aiPath.Move(speed * Time.deltaTime);
-        
-        rigidbody2d.MovePosition(aiPath.Position);
-        Debug.Log($"body: {aiPath.Position}");
+        rigidbody2d.position = aiPath.Position;
     }
 }

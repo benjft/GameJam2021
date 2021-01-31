@@ -713,10 +713,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
-  Position: {x: 0, y: 0}
   Patrol: []
   changeTime: 3
-  Detection: 0
 --- !u!212 &7911091251072444992
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -815,7 +813,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5717256825988758335}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 0
