@@ -12,16 +12,10 @@ public class AiController : MonoBehaviour
     Rigidbody2D rigidbody2d; // new added to remove warning
 
     float timer;
-    
+    public Vector2Int playerLocation;
     public AiPath aiPath { get; set; }
     void Start()
     {
-        //var GridManagerObject = GameObject.FindWithTag("Map");
-        //if (GridManagerObject != null)
-        //{
-        //    var GridManager = GridManagerObject.GetComponent<GridManager>();
-        //    aiPath = new AiPath(GridManager.NodeMap.SelectRandomAvailableNodes());
-        //}
         var points = new List<Vector2Int>();
         var route = new List<Vector2Int>();
         GenerateEnemies.CreateAndObtainPath(out points, out route);
@@ -51,7 +45,10 @@ public class AiController : MonoBehaviour
     }
     void FixedUpdate()
     {
-        aiPath.Move(speed * Time.deltaTime);
+        if(playerLocation != null)
+            aiPath.Move(speed * Time.deltaTime, playerLocation);
+        else
+            aiPath.Move(speed * Time.deltaTime);
         transform.transform.position = aiPath.Position;
     }
 }

@@ -8,14 +8,11 @@ public class PlayerController : MonoBehaviour
 
     public float speed = 3.0f;
     public int maxWill = 5;
-
     public int Will { get { return currentWill; } }
 
     public SpriteRenderer spriteRenderer;
     public Sprite newSprite;
     public Sprite oldSprite;
-
-
 
     int currentWill;
 
@@ -28,10 +25,10 @@ public class PlayerController : MonoBehaviour
     float horizontal;
     float vertical;
 
-    
-    
     //Animator animator;
     Vector2 lookDirection = new Vector2(1, 0);
+
+    List<AiController> ais;
 
     // Start is called before the first frame update
     void Start()
@@ -42,30 +39,33 @@ public class PlayerController : MonoBehaviour
         oldSprite = spriteRenderer.sprite;
         currentWill = maxWill;
     }
-
+    float time = 0;
     // Update is called once per frame
     void Update()
     {
+        time += Time.deltaTime;
+        if(time > 1)
+        {
+            ais = new List<AiController>();
+            foreach (var obj in GameObject.FindGameObjectsWithTag("Enemy"))
+            {
+                ais.Add(obj.GetComponent<AiController>());
+            }
+        }
         horizontal = Input.GetAxis("Horizontal");
         vertical = Input.GetAxis("Vertical");
         Vector2 move = new Vector2(horizontal, vertical);
-
         if (!Mathf.Approximately(move.x, 0.0f) || !Mathf.Approximately(move.y, 0.0f))
         {
             lookDirection.Set(move.x, move.y);
             lookDirection.Normalize();
         }
-
-        
-
         if (isInvincible)
         {
             invincibleTimer -= Time.deltaTime;
             if (invincibleTimer < 0)
                 isInvincible = false;
         }
-
-        
         if(Input.GetKey(KeyCode.Space))
         {
             Camouflage();
@@ -75,7 +75,6 @@ public class PlayerController : MonoBehaviour
         {
             Reveal();
         }
-        
     }
 
     void FixedUpdate()
@@ -83,7 +82,13 @@ public class PlayerController : MonoBehaviour
         Vector2 position = rigidbody2d.position;
         position.x += speed * horizontal * Time.deltaTime;
         position.y += speed * vertical * Time.deltaTime;
-
+        if(ais != null)
+        {
+            foreach (var ai in ais)
+            {
+                ai.playerLocation = new Vector2Int((int)position.x,(int)position.y);
+            }
+        }
         rigidbody2d.MovePosition(position);
     }
 
@@ -112,8 +117,6 @@ public class PlayerController : MonoBehaviour
         {
             //Changing sprite
             spriteRenderer.sprite = newSprite;
-             
-           
             isInvincible = true;
             
             timeCamo =- Time.deltaTime;
@@ -124,14 +127,9 @@ public class PlayerController : MonoBehaviour
                 Debug.Log(currentWill + "/" + maxWill);
                 //timeCamo = 1;
             }
-                
-            
-       
-                
         }
         else
             spriteRenderer.sprite = oldSprite;
-
     }
 
     void Reveal()
