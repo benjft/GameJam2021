@@ -1,32 +1,200 @@
 #!/python3.9
+import math
 import random
 import tkinter as tk
+from typing import Optional
 
 
-def _merge(all_nodes: dict[int, tuple[int, int]],
+def get_slope(a: tuple[int, int], b: tuple[int, int]) -> float:
+    return (a[1] - b[1]) / (a[0] - b[0])
+
+
+def get_mid(a: tuple[int, int], b: tuple[int, int]) -> tuple[float, float]:
+    x = (a[0] + b[0]) / 2
+    y = (a[1] + b[1]) / 2
+
+    return x, y
+
+
+def get_ccentre(a: tuple[int, int], b: tuple[int, int], c: tuple[int, int]) -> tuple[float, float, float]:
+    mid_ab = get_mid(a, b)
+    mid_ac = get_mid(a, c)
+
+    grad_ab = -1/get_slope(a, b)
+    grad_ac = -1/get_slope(a, c)
+
+    int_ab = mid_ab[1] - grad_ab*mid_ab[0]
+    int_ac = mid_ac[1] - grad_ac*mid_ac[0]
+
+    cx = (int_ac - int_ab) / (grad_ab - grad_ac)
+    cy = grad_ab * cx + int_ab
+    r2 = (cx - a[0])**2 + (cy - a[1])**2
+
+    return cx, cy, r2
+
+
+def try_add(candidate: int,
+            corner: int,
+            links_to: int,
+            nodes: list[int],
+            node_dict: list[tuple[int, int]]) -> bool:
+    cx, cy, r2 = get_ccentre(node_dict[candidate], node_dict[links_to], node_dict[corner])
+    for node in nodes:
+        if node in {candidate, corner, links_to}:
+            continue
+        x, y = node_dict[node]
+        node_r2 = (x-cx)**2 + (y-cy)**2
+        if node_r2 <= r2:
+            return False
+
+    return True
+
+
+def get_angle(a, b) -> float:
+    return math.atan2(b[1] - a[1], b[0] - a[0])
+
+
+
+def get_interior(a, b, c) -> float:
+    ab = get_angle(a, b)
+    ac = get_angle(a, c)
+
+    ang = ac - ab
+    if ang <= -math.pi:
+        ang += 2*math.pi
+    elif ang > math.pi:
+        ang -= 2*math.pi
+    return ang
+
+
+def shift_left(lowLeft, lowRight, nodes, edges):
+    moved = True
+    while moved:
+        moved = False
+        angle = get_angle(nodes[lowLeft], nodes[lowRight])
+        connected = edges[lowLeft]
+        angles = [get_angle(nodes[l], nodes[lowRight]) for l in edges[lowLeft]]
+        connected = [con for con, ang in sorted(zip(connected, angles), key=lambda v: v[1]) if ang > angle]
+        if connected:
+            lowLeft = connected[0]
+            moved = True
+    return lowLeft
+
+
+def shift_right(lowLeft, lowRight, nodes, edges):
+    moved = True
+    while moved:
+        moved = False
+        angle = get_angle(nodes[lowLeft], nodes[lowRight])
+        connected = edges[lowRight]
+        angles = [get_angle(nodes[lowLeft], nodes[r]) for r in edges[lowRight]]
+        connected = [con for con, ang in sorted(zip(connected, angles), key=lambda v: v[1]) if ang < angle]
+        if connected:
+            lowRight = connected[0]
+            moved = True
+    return lowRight
+
+
+def find_lowest(left, right, nodes, edges):
+    bot_left = min(left, key=lambda i: nodes[i][1])
+    bot_right = min(right, key=lambda i: nodes[i][1])
+
+    if nodes[bot_left][1] < nodes[bot_right][1]:
+        bot_right = shift_right(bot_left, bot_right, nodes, edges)
+    changed = True
+    while changed:
+        tmp = shift_left(bot_left, bot_right, nodes, edges)
+        changed = tmp != bot_left
+        bot_left = tmp
+        tmp = shift_right(bot_left, bot_right, nodes, edges)
+        changed = changed or (tmp != bot_right)
+        bot_right = tmp
+    return bot_left, bot_right
+
+def _merge(all_nodes: list[tuple[int, int]],
            left_nodes: list[int],
            left_edges: list[tuple[int, int]],
            right_nodes: list[int],
            right_edges: list[tuple[int, int]]) -> list[tuple[int, int]]:
-    edge_map: dict[int, list[int]] = {}
+    edge_map: dict[int, set[int]] = {}
     for a, b in left_edges + right_edges:
-        edge_map[a] = edge_map.get(a, []) + [b]
-        edge_map[b] = edge_map.get(b, []) + [a]
+        edge_map.setdefault(a, set()).add(b)
+        edge_map.setdefault(b, set()).add(a)
 
-    bottom_left = min(left_nodes, key=lambda i: (all_nodes[i][1], -all_nodes[i][0]))
-    bottom_right = min(right_nodes, key=lambda i: (all_nodes[i][1], all_nodes[i][0]))
+    draw_graph(all_nodes, [(k, n) for k, l in edge_map.items() for n in l if n > k])
+    merge_nodes = left_nodes + right_nodes
 
-    link_edges: list[tuple[int, int]] = [(bottom_left, bottom_right)]
+    bot_left, bot_right = find_lowest(left_nodes, right_nodes, all_nodes, edge_map)
 
-    left_candidates = [node for node in edge_map[bottom_left] if all_nodes[node][1] > all_nodes[bottom_left][1]]
-    right_candidates = [node for node in edge_map[bottom_right] if all_nodes[node][1] > all_nodes[bottom_right][1]]
+    edge_map[bot_left].add(bot_right)
+    edge_map[bot_right].add(bot_left)
 
-    left_candidate = max(left_candidates, key=lambda i: all_nodes[i][0])
-    right_candidate = min(right_candidates, key=lambda i: all_nodes[i][0])
+    draw_graph(all_nodes, [(k, n) for k, l in edge_map.items() for n in l if n > k])
 
-    return ...
+    left_candidates: Optional[list[int]] = None
+    right_candidates: Optional[list[int]] = None
 
-def _get_edges(all_nodes: dict[int, tuple[int, int]], x_order: list[int]) -> list[tuple[int, int]]:
+    def find_candidates():
+        nonlocal left_candidates, right_candidates
+
+        left_candidates = [node for node in edge_map[bot_left] if node not in right_nodes]
+        left_angles = [get_interior(all_nodes[bot_left], all_nodes[bot_right], all_nodes[node]) for node in left_candidates]
+        lca = [(node, angle) for node, angle in zip(left_candidates, left_angles) if angle >= 0]
+        left_candidates = [node for node, _ in sorted(lca, key=lambda v: -v[1])]
+
+        right_candidates = [node for node in edge_map[bot_right] if node not in left_nodes]
+        right_angles = [get_interior(all_nodes[bot_right], all_nodes[bot_left], all_nodes[node]) for node in right_candidates]
+        rca = [(node, angle) for node, angle in zip(right_candidates, right_angles) if angle <= 0]
+        right_candidates = [node for node, _ in sorted(rca, key=lambda v: v[1])]
+
+    find_candidates()
+
+    left_reject = []
+    right_reject = []
+
+    while left_candidates or right_candidates:
+        if left_candidates:
+            left = left_candidates.pop()
+            success = try_add(left, bot_left, bot_right, merge_nodes, all_nodes)
+            if success:
+                for node in left_reject:
+                    edge_map[bot_left].remove(node)
+                    edge_map[node].remove(bot_left)
+                edge_map[left].add(bot_right)
+                edge_map[bot_right].add(left)
+
+                draw_graph(all_nodes, [(k, n) for k, l in edge_map.items() for n in l if n > k])
+                bot_left = left
+                left_reject = []
+                right_reject = []
+
+                find_candidates()
+            else:
+                left_reject.append(left)
+        if right_candidates:
+            right = right_candidates.pop()
+            success = try_add(right, bot_right, bot_left, merge_nodes, all_nodes)
+            if success:
+                for node in right_reject:
+                    edge_map[bot_right].remove(node)
+                    edge_map[node].remove(bot_right)
+                edge_map[right].add(bot_left)
+                edge_map[bot_left].add(right)
+
+                draw_graph(all_nodes, [(k, n) for k, l in edge_map.items() for n in l if n > k])
+                bot_right = right
+
+                left_reject = []
+                right_reject = []
+
+                find_candidates()
+            else:
+                right_reject.append(right)
+    edges = [(k, n) for k, l in edge_map.items() for n in l if n > k]
+    return edges
+
+
+def _get_edges(all_nodes: list[tuple[int, int]], x_order: list[int]) -> list[tuple[int, int]]:
     """
     Form the triangulation through divide and conquer.
     Assumes that nodes are sorted by x coordinate
@@ -45,7 +213,7 @@ def _get_edges(all_nodes: dict[int, tuple[int, int]], x_order: list[int]) -> lis
     left_edges = _get_edges(all_nodes, left_nodes)
     right_edges = _get_edges(all_nodes, right_nodes)
 
-    return left_edges + right_edges # _merge(all_nodes, left_nodes, left_edges, right_nodes, right_edges)
+    return _merge(all_nodes, left_nodes, left_edges, right_nodes, right_edges)
 
 
 def get_edges(nodes: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -55,31 +223,43 @@ def get_edges(nodes: list[tuple[int, int]]) -> list[tuple[int, int]]:
     """
 
     # sort the list by x coordinate, keep original index as reference.
-    node_dict = {k: v for k, v in enumerate(nodes)}
-    nodes_by_x = sorted(node_dict.keys(), key=lambda k: node_dict[k])
-    return _get_edges(node_dict, nodes_by_x)
+    nodes_by_x = sorted(range(len(nodes)), key=lambda k: nodes[k])
+    return _get_edges(nodes, nodes_by_x)
 
 
 def draw_graph(nodes: list[tuple[int, int]], edges: list[tuple[int, int]]):
     root = tk.Tk()
-
-    canvas = tk.Canvas(root, bg="black", height=10 + max(y for x, y in nodes), width=10 + max(x for x, y in nodes))
+    w = 20 + max(x for x, y in nodes)
+    h = 20 + max(y for x, y in nodes)
+    canvas = tk.Canvas(root, bg="black", height=h, width=w)
     canvas.pack()
     for x, y in nodes:
-        canvas.create_oval(x, y, x + 10, y + 10, fill="white")
+        canvas.create_oval(x, h-y-20, x+20, h-y, fill="white")
 
     for n1, n2 in edges:
         x1, y1 = nodes[n1]
         x2, y2 = nodes[n2]
 
-        canvas.create_line(x1 + 5, y1 + 5, x2 + 5, y2 + 5, fill="white", width=3)
+        canvas.create_line(x1+10, h-y1-10, x2 + 10, h - y2 - 10, fill="white", width=3)
 
     root.mainloop()
 
 
 def main():
-    rand_coord = lambda: 10 * random.randint(0, 30)
-    nodes = [(rand_coord(), rand_coord()) for i in range(10)]
+    seed = random.randint(0, 1000000)
+    print(seed)
+    random.seed(seed)
+    rand_coord = lambda: 1000 * random.random()
+    nodes: list[tuple[float, float]] = [(300, 354), (350, 347), (355, 291), (409, 266), (420, 317), (446, 254), (448, 344), (467, 277), (494, 309), (497, 264)]
+    # while len(nodes) < 10:
+    #     x, y = rand_coord(), rand_coord()
+    #     for x2, y2 in nodes:
+    #         r2 = (x-x2)**2 + (y-y2)**2
+    #         if r2 < 50**2:
+    #             break
+    #     else:
+    #         nodes.append((x, y))
+
     edges = get_edges(nodes)
     draw_graph(nodes, edges)
 
