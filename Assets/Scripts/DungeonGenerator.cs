@@ -9,10 +9,10 @@ using UnityEngine.EventSystems;
 using Random = UnityEngine.Random;
 
 public class DungeonGenerator : MonoBehaviour {
-    public int roomRadius = 9;
-    public int coridoorRadius = 3;
+    public int roomRadius = 10;
+    public int coridoorRadius = 1;
 
-    bool[,] buildMap(List<LayoutNode> nodes) {
+    char[,] buildMap(List<LayoutNode> nodes) {
         
         var minX = nodes.Min(n => n.X - 2*roomRadius);
         var minY = nodes.Min(n => n.Y - 2*roomRadius);
@@ -20,14 +20,14 @@ public class DungeonGenerator : MonoBehaviour {
         var maxX = nodes.Max(n => n.X + 2*roomRadius);
         var maxY = nodes.Max(n => n.Y + 2*roomRadius);
 
-        var map = new bool[1 + maxX - minX, 1 + maxY - minY];
+        var map = new char[1 + maxX - minX, 1 + maxY - minY];
         foreach (var node in nodes) {
             for (var x = -roomRadius; x <= roomRadius; x++) {
                 for (var y = -roomRadius; y <= roomRadius; y++) {
                     var r2 = x * x + y * y;
                     if (r2 > roomRadius * roomRadius)
                         continue;
-                    map[node.X + x - minX, node.Y + y - minY] = true;
+                    map[node.X + x - minX, node.Y + y - minY] = 'f';
                 }
             }
 
@@ -41,7 +41,7 @@ public class DungeonGenerator : MonoBehaviour {
                         int x = node.X + (int) (yProg * slope);
                         int y = node.Y + yProg;
                         for (var r = -coridoorRadius; r <= coridoorRadius; r++) {
-                            map[x + r - minX, y - minY] = true;
+                            map[x + r - minX, y - minY] = 'f';
                         }
                     }
                 } else {
@@ -50,13 +50,18 @@ public class DungeonGenerator : MonoBehaviour {
                         int y = node.Y + (int) (xProg * slope);
                         int x = node.X + xProg;
                         for (var r = -coridoorRadius; r <= coridoorRadius; r++) {
-                            map[x - minX, y + r - minY] = true;
+                            map[x - minX, y + r - minY] = 'f';
                         }
                     }
                 }
             }
         }
 
+        var startNode = nodes.First();
+        map[startNode.X - minX, startNode.Y - minY] = 's';
+        var endNode = nodes.Last();
+        map[endNode.X - minX, endNode.Y - minY] = 'e';
+        
         return map;
     }
     
@@ -64,6 +69,9 @@ public class DungeonGenerator : MonoBehaviour {
     void Start() {
         var layout = new Layout();
         layout.NRooms = 20;
+        layout.RoomSize = 2 * roomRadius;
+        layout.CorridoorSize = coridoorRadius;
+        layout.MAXCorridoorLength = 3 * (roomRadius + coridoorRadius);
         layout.Generate();
         
         var map = buildMap(layout.LayoutNodes);
@@ -82,12 +90,15 @@ public class DungeonGenerator : MonoBehaviour {
                 var posX = col * scale;
                 var posY = -row * scale;
                 GameObject tile;
-                if (row == 0 && col == 0) {
-                    tile = Instantiate(tileStart, transform);
-                } else if (row == rows-1 && col == cols-1) {
-                    tile = Instantiate(tileEnd, transform);
-                } else {
-                    tile = Instantiate(map[col, row] ? tileFloor : tileWall, transform);
+                switch (map[col, row]) {
+                    case 's': tile = Instantiate(tileStart, transform);
+                        break;
+                    case 'e': tile = Instantiate(tileEnd, transform);
+                        break;
+                    case 'f': tile = Instantiate(tileFloor, transform);
+                        break;
+                    default: tile = Instantiate(tileWall, transform);
+                        break;
                 }
                 tile.transform.position = new Vector3(posX, posY);
             }
@@ -101,17 +112,15 @@ public class DungeonGenerator : MonoBehaviour {
 
 
 internal class Layout {
-    internal int Width = 500;
-    internal int Height = 500;
     internal int NRooms = 10;
-
     internal int RoomSize = 20;
     internal int CorridoorSize = 10;
     private double ExcludeNear => Math.Pow(RoomSize + CorridoorSize, 2);
     internal int MAXCorridoorLength = 40;
     private double ExculdeFar => Math.Pow(RoomSize + MAXCorridoorLength, 2);
 
-    internal int Seed = Random.Range(0, int.MaxValue);
+    internal int Side => (int)((RoomSize + CorridoorSize) * Math.Sqrt(NRooms));
+    internal int Seed = 281767567; // Random.Range(0, int.MaxValue);
 
     internal List<LayoutNode> LayoutNodes;
     
@@ -330,7 +339,7 @@ internal class Layout {
         // i to prevent stuck condition if room can't be placed.
         for (var i = 0; LayoutNodes.Count < NRooms && i < 100; i++) {
             // new coord
-            var nodePos = new Vector2Int(Random.Range(0, Width), Random.Range(0, Height));
+            var nodePos = new Vector2Int(Random.Range(0, Side), Random.Range(0, Side));
             var distance = LayoutNodes.Select(node => (node.Position - nodePos).sqrMagnitude).ToList();
             // are we within exculsion zone
             var near = distance.Any(d=> d < ExcludeNear);
