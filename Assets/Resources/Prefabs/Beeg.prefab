@@ -748,6 +748,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3122340750359747896}
   - component: {fileID: 1840227654584934768}
+  - component: {fileID: 8309614976294640196}
   - component: {fileID: 6203302278879392858}
   - component: {fileID: 5940426409738304821}
   - component: {fileID: 8283902874245246932}
@@ -802,6 +803,18 @@ MonoBehaviour:
   speed: 3
   Patrol: []
   changeTime: 3
+--- !u!114 &8309614976294640196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7043421405314292566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 665698db9fb7f4a4e9c92eb1093bb430, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!212 &6203302278879392858
 SpriteRenderer:
   m_ObjectHideFlags: 0
