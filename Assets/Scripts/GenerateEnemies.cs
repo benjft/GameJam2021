@@ -32,7 +32,7 @@ public class GenerateEnemies : MonoBehaviour
                     (int)tile.transform.position.y)
                 });
         }
-        return map.FastestRoute($"{from}", $"{to}");
+        return map.FastestRoute(from, to);
     }
     public static void CreateAndObtainPath(out List<Vector2Int> points, out List<Vector2Int> route)
     {
@@ -52,6 +52,6 @@ public class GenerateEnemies : MonoBehaviour
         points.Add(map.Nodes.ElementAt(Random.Range(0, map.Nodes.Count - 1)).Value.Position);
         points.Add(map.Nodes.ElementAt(Random.Range(0, map.Nodes.Count - 1)).Value.Position);
         points.Add(map.Nodes.ElementAt(Random.Range(0, map.Nodes.Count - 1)).Value.Position);
-        route = map.FastestRoute($"{points[0]}", $"{points[1]}");
+        route = map.FastestRoute(points[0], points[1]);
     }
 }

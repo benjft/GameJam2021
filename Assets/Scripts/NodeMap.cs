@@ -23,11 +23,21 @@ public class NodeMap
         }
         return visitedTiles;
     }
-    public List<Vector2Int> FastestRoute(string startId, string finishId)
+    public List<Vector2Int> FastestRoute(Vector2Int startId, Vector2Int finishId)
     {
         Node start, finish;
-        if (!Nodes.TryGetValue(startId, out start)) return null;
-        if (!Nodes.TryGetValue(finishId, out finish)) return null;
+        if (!Nodes.TryGetValue($"{startId}", out start))
+            if (!Nodes.TryGetValue($"{new Vector2Int(startId.x + 1, startId.y)}", out start))
+                if (!Nodes.TryGetValue($"{new Vector2Int(startId.x, startId.y + 1)}", out start))
+                    if (!Nodes.TryGetValue($"{new Vector2Int(startId.x - 1, startId.y)}", out start))
+                        if (!Nodes.TryGetValue($"{new Vector2Int(startId.x, startId.y - 1)}", out start))
+                            return null;
+        if (!Nodes.TryGetValue($"{finishId}", out finish))
+            if (!Nodes.TryGetValue($"{new Vector2Int(finishId.x + 1, finishId.y)}", out finish))
+                if (!Nodes.TryGetValue($"{new Vector2Int(finishId.x, finishId.y + 1)}", out finish))
+                    if (!Nodes.TryGetValue($"{new Vector2Int(finishId.x - 1, finishId.y)}", out finish))
+                        if (!Nodes.TryGetValue($"{new Vector2Int(finishId.x, finishId.y - 1)}", out finish))
+                            return null;
         start.SetDistance(finish);
         var activeTiles = new List<Node>() { start };
         var checkedIds = new List<string>();
@@ -70,7 +80,7 @@ public class NodeMap
         }
         catch (System.Exception)
         {
-            Debug.Log("Stopping hang but can't work out why");
+            return new List<Vector2Int>() { startId };
         }
         return positions;
     }

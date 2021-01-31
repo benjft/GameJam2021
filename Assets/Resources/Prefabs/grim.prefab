@@ -50,10 +50,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e941bbd39c65db942bfd5ae5c54ab269, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
+  id: -1
+  speed: 0.3
   Patrol: []
   changeTime: 3
-  playerLocation: {x: 0, y: 0}
+  PlayerSet: 0
+  PlayerLocation: {x: 0, y: 0}
 --- !u!212 &8266287659063234641
 SpriteRenderer:
   m_ObjectHideFlags: 0

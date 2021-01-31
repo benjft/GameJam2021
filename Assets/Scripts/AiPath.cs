@@ -21,21 +21,23 @@ public class AiPath
         Position = patrolPoints[0];
         PatrolPoints = patrolPoints;
     }
-    public void Move(float speed, Vector2Int playerLastSeen)
+    public float Move(float speed, Vector2Int playerLastSeen)
     {
-        if (stop) return;
         this.playerLastSeen = playerLastSeen;
         playerSeenSet = true;
-        if (checkPlayer()) 
+        if (checkPlayer(5)) 
             pursuit(speed);
         else
             patrol(speed);
+        if (checkPlayer(3))
+            return 1f;
+        return 0f;
     }
     public void Move(float speed)
     {
         patrol(speed);
     }
-    private bool checkPlayer()
+    public bool checkPlayer(int places)
     {
 
         if(Math.Abs(playerLastSeen.x - (int)Position.x + playerLastSeen.y - (int)Position.y) < 3 && playerSeenSet)
@@ -91,7 +93,7 @@ public class AiPath
         {
             pathPointsi++;
             // reset to starting path position
-            if (Path.Count <= pathPointsi) { stop = true; Debug.Log("fini"); }
+            if (Path.Count <= pathPointsi) { return; }
         }
         Position = newPos;
     }

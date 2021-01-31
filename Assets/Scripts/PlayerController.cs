@@ -5,16 +5,13 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     // Start is called before the first frame update
-
+    public HourGlass TopGlass, BottomGlass;
     public float speed = 3.0f;
     public int maxWill = 5;
-    public int Will { get { return currentWill; } }
 
     public SpriteRenderer spriteRenderer;
     public Sprite newSprite;
     public Sprite oldSprite;
-
-    int currentWill;
 
     public float timeCamo = 0.0f;
     public float timeInvincible = 2.0f;
@@ -24,7 +21,7 @@ public class PlayerController : MonoBehaviour
     public Rigidbody2D rigidbody2d;
     float horizontal;
     float vertical;
-
+    float current_willpower = 100;
     //Animator animator;
     Vector2 lookDirection = new Vector2(1, 0);
 
@@ -33,11 +30,15 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        BottomGlass.flip = true;
+        current_willpower = 100;
+        TopGlass.SetMaxWillpower(100);
+        BottomGlass.SetMaxWillpower(100);
         rigidbody2d = GetComponent<Rigidbody2D>();
         //animator = GetComponent<Animator>();
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         oldSprite = spriteRenderer.sprite;
-        currentWill = maxWill;
+        current_willpower = maxWill;
 
         ais = new Dictionary<int, AiController>();
         foreach (var obj in GameObject.FindGameObjectsWithTag("Enemy"))
@@ -88,7 +89,7 @@ public class PlayerController : MonoBehaviour
         }
         if(Input.GetKey(KeyCode.Space))
         {
-            Camouflage();
+            //Camouflage();
         }
         else
         {
@@ -102,41 +103,46 @@ public class PlayerController : MonoBehaviour
         position.y += speed * vertical * Time.deltaTime;
         rigidbody2d.MovePosition(position);
     }
-    public void ChangeWill(int amount)
-    {
-        if (amount < 0)
-        {
-           // animator.SetTrigger("Hit");
-            if (isInvincible)
-                return;
+    //public void ChangeWill(int amount)
+    //{
+    //    if (amount < 0)
+    //    {
+    //       // animator.SetTrigger("Hit");
+    //        if (isInvincible)
+    //            return;
 
-            isInvincible = true;
-            invincibleTimer = timeInvincible;
-        }
+    //        isInvincible = true;
+    //        invincibleTimer = timeInvincible;
+    //    }
 
-        //currentWill = Mathf.Clamp(currentWill + amount, 0, maxWill);
-        currentWill += amount;
-    }
-    void Camouflage()
-    {
-        if (Will > 1)
-        {
-            //Changing sprite
-            spriteRenderer.sprite = newSprite;
-            isInvincible = true;
+    //    //currentWill = Mathf.Clamp(currentWill + amount, 0, maxWill);
+    //    currentWill += amount;
+    //}
+    //void Camouflage()
+    //{
+    //    if (Will > 1)
+    //    {
+    //        //Changing sprite
+    //        spriteRenderer.sprite = newSprite;
+    //        isInvincible = true;
             
-            timeCamo =- Time.deltaTime;
-            if (timeCamo <= 0)
-            {
-                ChangeWill(-1);
-                //timeCamo = 1;
-            }
-        }
-        else
-            spriteRenderer.sprite = oldSprite;
-    }
+    //        timeCamo =- Time.deltaTime;
+    //        if (timeCamo <= 0)
+    //        {
+    //            ChangeWill(-1);
+    //            //timeCamo = 1;
+    //        }
+    //    }
+    //    else
+    //        spriteRenderer.sprite = oldSprite;
+    //}
     void Reveal()
     {
         spriteRenderer.sprite = oldSprite;
+    }
+    public void TakeDamage(float dmg)
+    {
+        TopGlass.Reduce(dmg);
+        BottomGlass.Reduce(dmg);
     }
 }
