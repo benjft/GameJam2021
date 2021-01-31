@@ -7,12 +7,19 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
 
     public float speed = 3.0f;
-
     public int maxWill = 5;
 
     public int Will { get { return currentWill; } }
+
+    public SpriteRenderer spriteRenderer;
+    public Sprite newSprite;
+    public Sprite oldSprite;
+
+
+
     int currentWill;
 
+    public float timeCamo = 0.0f;
     public float timeInvincible = 2.0f;
     bool isInvincible;
     float invincibleTimer;
@@ -21,6 +28,8 @@ public class PlayerController : MonoBehaviour
     float horizontal;
     float vertical;
 
+    
+    
     //Animator animator;
     Vector2 lookDirection = new Vector2(1, 0);
 
@@ -29,7 +38,8 @@ public class PlayerController : MonoBehaviour
     {
         rigidbody2d = GetComponent<Rigidbody2D>();
         //animator = GetComponent<Animator>();
-
+        spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+        oldSprite = spriteRenderer.sprite;
         currentWill = maxWill;
     }
 
@@ -46,9 +56,7 @@ public class PlayerController : MonoBehaviour
             lookDirection.Normalize();
         }
 
-        //animator.SetFloat("Look X", lookDirection.x);
-        //animator.SetFloat("Look Y", lookDirection.y);
-        //animator.SetFloat("Speed", move.magnitude);
+        
 
         if (isInvincible)
         {
@@ -57,6 +65,16 @@ public class PlayerController : MonoBehaviour
                 isInvincible = false;
         }
 
+        
+        if(Input.GetKey(KeyCode.Space))
+        {
+            Camouflage();
+            
+        }
+        else
+        {
+            Reveal();
+        }
         
     }
 
@@ -82,7 +100,45 @@ public class PlayerController : MonoBehaviour
             invincibleTimer = timeInvincible;
         }
 
-        currentWill = Mathf.Clamp(currentWill + amount, 0, maxWill);
+        //currentWill = Mathf.Clamp(currentWill + amount, 0, maxWill);
+        Debug.Log(currentWill + "/" + maxWill);
+        currentWill += amount;
         Debug.Log(currentWill + "/" + maxWill);
     }
+
+    void Camouflage()
+    {
+        if (Will > 1)
+        {
+            //Changing sprite
+            spriteRenderer.sprite = newSprite;
+             
+           
+            isInvincible = true;
+            
+            timeCamo =- Time.deltaTime;
+            if (timeCamo <= 0)
+            {
+                Debug.Log(currentWill + "/" + maxWill);
+                ChangeWill(-1);
+                Debug.Log(currentWill + "/" + maxWill);
+                //timeCamo = 1;
+            }
+                
+            
+       
+                
+        }
+        else
+            spriteRenderer.sprite = oldSprite;
+
+    }
+
+    void Reveal()
+    {
+        spriteRenderer.sprite = oldSprite;
+    }
+
+
+
 }
