@@ -120,7 +120,7 @@ internal class Layout {
     private double ExculdeFar => Math.Pow(RoomSize + MAXCorridoorLength, 2);
 
     internal int Side => (int)((RoomSize + CorridoorSize) * Math.Sqrt(NRooms));
-    internal int Seed = 281767567; // Random.Range(0, int.MaxValue);
+    internal int Seed = Random.Range(0, int.MaxValue);
 
     internal List<LayoutNode> LayoutNodes;
     
