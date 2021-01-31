@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
 
     int currentWill;
 
-    public float timeCamo = 2.0f;
+    public float timeCamo = 0.0f;
     public float timeInvincible = 2.0f;
     bool isInvincible;
     float invincibleTimer;
@@ -100,7 +100,9 @@ public class PlayerController : MonoBehaviour
             invincibleTimer = timeInvincible;
         }
 
-        currentWill = Mathf.Clamp(currentWill + amount, 0, maxWill);
+        //currentWill = Mathf.Clamp(currentWill + amount, 0, maxWill);
+        Debug.Log(currentWill + "/" + maxWill);
+        currentWill += amount;
         Debug.Log(currentWill + "/" + maxWill);
     }
 
@@ -110,9 +112,22 @@ public class PlayerController : MonoBehaviour
         {
             //Changing sprite
             spriteRenderer.sprite = newSprite;
+             
+           
             isInvincible = true;
-            invincibleTimer -= Time.deltaTime;
-            ChangeWill(-1);
+            
+            timeCamo =- Time.deltaTime;
+            if (timeCamo <= 0)
+            {
+                Debug.Log(currentWill + "/" + maxWill);
+                ChangeWill(-1);
+                Debug.Log(currentWill + "/" + maxWill);
+                //timeCamo = 1;
+            }
+                
+            
+       
+                
         }
         else
             spriteRenderer.sprite = oldSprite;
