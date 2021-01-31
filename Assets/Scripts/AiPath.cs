@@ -8,6 +8,7 @@ public class AiPath
 
     public Vector2 Position { get; private set; }
     private Vector2Int playerLastSeen;
+    private bool playerSeenSet = false;
     public string PathState { get; set; }
     public List<Vector2Int> PatrolPoints { get; private set; }
     private Vector2Int destination;
@@ -22,9 +23,12 @@ public class AiPath
     }
     public void Move(float speed, Vector2Int playerLastSeen)
     {
+        if (stop) return;
         this.playerLastSeen = playerLastSeen;
-        //if (checkPlayer()) pursuit(speed);
-        //else 
+        playerSeenSet = true;
+        if (checkPlayer()) 
+            pursuit(speed);
+        else
             patrol(speed);
     }
     public void Move(float speed)
@@ -33,7 +37,8 @@ public class AiPath
     }
     private bool checkPlayer()
     {
-        if(Math.Abs(playerLastSeen.x - (int)Position.x + playerLastSeen.y - (int)Position.y) < 3)
+
+        if(Math.Abs(playerLastSeen.x - (int)Position.x + playerLastSeen.y - (int)Position.y) < 3 && playerSeenSet)
         {
             patrolState = false;
             return true;
@@ -57,6 +62,7 @@ public class AiPath
             patrolPointsi++;
             if (patrolPointsi == PatrolPoints.Count) patrolPointsi = 0;
         }
+        if (Path == null) { Debug.Log("null path patrol"); patrolPointsi++; return; }
         // increase position
         if (Path.Count <= 1)
         {
@@ -73,15 +79,20 @@ public class AiPath
         }
         Position = newPos;
     }
-    int checkEveryTen = -1;
+    bool stop = false;
     private void pursuit(float speed)
     {
-        if(checkEveryTen == 10 || checkEveryTen == -1)
+        setPathPoints(new Vector2Int((int)Position.x, (int)Position.y), playerLastSeen);
+        if (Path == null) { Debug.Log("hereio"); return; }
+        pathPointsi = 0;
+        if (Path.Count == 0) return;
+        var newPos = new Vector2(setVal(speed, Position.x, Path[pathPointsi].x), setVal(speed, Position.y, Path[pathPointsi].y));
+        if (newPos == Path[pathPointsi])
         {
-            setPathPoints(new Vector2Int((int)Position.x, (int)Position.y), playerLastSeen);
+            pathPointsi++;
+            // reset to starting path position
+            if (Path.Count <= pathPointsi) { stop = true; Debug.Log("fini"); }
         }
-        Debug.Log("after him");
-        Vector2 newPos = new Vector2(setVal(speed, Position.x,Path[pathPointsi].x), setVal(speed, Position.y, Path[pathPointsi].y));
         Position = newPos;
     }
     private float setVal(float speed, float xy, float comp)
@@ -114,5 +125,6 @@ public class AiPath
     private void setPathPoints(Vector2Int from, Vector2Int to)
     {
         Path = GenerateEnemies.ObtainPath(from, to);
+        
     }
 }

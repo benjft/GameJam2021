@@ -12,10 +12,11 @@ public class GenerateEnemies : MonoBehaviour
         Instantiate(obj);
         Debug.Log("enemy created");
     }
-    public static void Generate2()
+    public static void Generate2(int enemyId)
     {
         var enemy = Resources.Load("Prefabs/grim") as GameObject;
         AiController obj = enemy.GetComponent<AiController>();
+        obj.id = enemyId;
         Instantiate(obj);
         Debug.Log("enemy created");
     }

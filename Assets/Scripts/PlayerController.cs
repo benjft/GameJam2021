@@ -21,14 +21,14 @@ public class PlayerController : MonoBehaviour
     bool isInvincible;
     float invincibleTimer;
 
-    Rigidbody2D rigidbody2d;
+    public Rigidbody2D rigidbody2d;
     float horizontal;
     float vertical;
 
     //Animator animator;
     Vector2 lookDirection = new Vector2(1, 0);
 
-    List<AiController> ais;
+    Dictionary<int, AiController> ais;
 
     // Start is called before the first frame update
     void Start()
@@ -38,18 +38,38 @@ public class PlayerController : MonoBehaviour
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         oldSprite = spriteRenderer.sprite;
         currentWill = maxWill;
+
+        ais = new Dictionary<int, AiController>();
+        foreach (var obj in GameObject.FindGameObjectsWithTag("Enemy"))
+        {
+            Debug.Log($"save");
+            var item = obj.GetComponent<AiController>();
+            item.PlayerLocation = new Vector2Int((int)rigidbody2d.position.x, (int)rigidbody2d.position.y);
+            item.PlayerSet = true;
+            if(!ais.ContainsKey(item.id))
+                ais.Add(item.id, item);
+            else
+                ais[item.id].PlayerLocation = new Vector2Int((int)rigidbody2d.position.x, (int)rigidbody2d.position.y);
+        }
     }
     float time = 0;
+    
     // Update is called once per frame
     void Update()
     {
         time += Time.deltaTime;
-        if(time > 1)
+        if (time > 0.5)
         {
-            ais = new List<AiController>();
+            time = 0;
             foreach (var obj in GameObject.FindGameObjectsWithTag("Enemy"))
             {
-                ais.Add(obj.GetComponent<AiController>());
+                var item = obj.GetComponent<AiController>();
+                item.PlayerLocation = new Vector2Int((int)rigidbody2d.position.x, (int)rigidbody2d.position.y);
+                item.PlayerSet = true;
+                if (!ais.ContainsKey(item.id))
+                    ais.Add(item.id, item);
+                else
+                    ais[item.id].PlayerLocation = new Vector2Int((int)rigidbody2d.position.x, (int)rigidbody2d.position.y);
             }
         }
         horizontal = Input.GetAxis("Horizontal");
@@ -69,35 +89,24 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKey(KeyCode.Space))
         {
             Camouflage();
-            
         }
         else
         {
             Reveal();
         }
     }
-
     void FixedUpdate()
     {
         Vector2 position = rigidbody2d.position;
         position.x += speed * horizontal * Time.deltaTime;
         position.y += speed * vertical * Time.deltaTime;
-        if(ais != null)
-        {
-            foreach (var ai in ais)
-            {
-                ai.playerLocation = new Vector2Int((int)position.x,(int)position.y);
-            }
-        }
         rigidbody2d.MovePosition(position);
     }
-
     public void ChangeWill(int amount)
     {
         if (amount < 0)
         {
            // animator.SetTrigger("Hit");
-            
             if (isInvincible)
                 return;
 
@@ -106,11 +115,8 @@ public class PlayerController : MonoBehaviour
         }
 
         //currentWill = Mathf.Clamp(currentWill + amount, 0, maxWill);
-        Debug.Log(currentWill + "/" + maxWill);
         currentWill += amount;
-        Debug.Log(currentWill + "/" + maxWill);
     }
-
     void Camouflage()
     {
         if (Will > 1)
@@ -122,21 +128,15 @@ public class PlayerController : MonoBehaviour
             timeCamo =- Time.deltaTime;
             if (timeCamo <= 0)
             {
-                Debug.Log(currentWill + "/" + maxWill);
                 ChangeWill(-1);
-                Debug.Log(currentWill + "/" + maxWill);
                 //timeCamo = 1;
             }
         }
         else
             spriteRenderer.sprite = oldSprite;
     }
-
     void Reveal()
     {
         spriteRenderer.sprite = oldSprite;
     }
-
-
-
 }

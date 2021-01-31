@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameState : MonoBehaviour
 {
     GameObject GridManagerObject;
+    int enemyId = 0;
     void Start()
     {
         StartCoroutine(GenerateContent());
@@ -14,7 +15,8 @@ public class GameState : MonoBehaviour
     {
         Debug.Log("creating enemy");
         yield return new WaitForSeconds(1);
-        GenerateEnemies.Generate2();
+        GenerateEnemies.Generate2(enemyId);
+        enemyId++;
         //GenerateEnemies.Generate2();
         //GenerateEnemies.Generate2();
         //GenerateEnemies.Generate2();

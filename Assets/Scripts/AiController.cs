@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AiController : MonoBehaviour
 {
+    public int id = -1;
     public float speed = 3f;
     
     public List<Vector2> Patrol = new List<Vector2>();
@@ -12,7 +13,8 @@ public class AiController : MonoBehaviour
     Rigidbody2D rigidbody2d; // new added to remove warning
 
     float timer;
-    public Vector2Int playerLocation = new Vector2Int(-1000,-1000);
+    public bool PlayerSet = false;
+    public Vector2Int PlayerLocation;
     public AiPath aiPath { get; set; }
     void Start()
     {
@@ -40,13 +42,14 @@ public class AiController : MonoBehaviour
         if (player != null)
         {
             player.ChangeWill(-3);
-        
         }
     }
     void FixedUpdate()
     {
-        if(playerLocation.x != -1000)
-            aiPath.Move(speed * Time.deltaTime, playerLocation);
+        if (PlayerSet)
+        {
+            aiPath.Move(speed * Time.deltaTime, PlayerLocation);
+        }
         else
             aiPath.Move(speed * Time.deltaTime);
         transform.transform.position = aiPath.Position;
