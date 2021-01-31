@@ -58,25 +58,6 @@ public class AiPath
             if (patrolPointsi == PatrolPoints.Count) patrolPointsi = 0;
         }
         // increase position
-        if(Path.Count <= 1)
-        {
-            Path = null;
-            return;
-        }
-        Vector2 newPos = new Vector2(setVal(speed, Position.x,Path[pathPointsi].x), setVal(speed, Position.y, Path[pathPointsi].y));
-        // if it has made it to the path
-        if (newPos == Path[pathPointsi])
-        {
-            pathPointsi++;
-            // reset to starting path position
-            if (Path.Count <= pathPointsi) { Path = null; pathPointsi = 1; }
-        }
-        movePath(speed);
-        Position = newPos;
-    }
-    private void movePath(float speed)
-    {
-        // increase position
         if (Path.Count <= 1)
         {
             Path = null;
@@ -90,6 +71,7 @@ public class AiPath
             // reset to starting path position
             if (Path.Count <= pathPointsi) { Path = null; pathPointsi = 1; }
         }
+        Position = newPos;
     }
     int checkEveryTen = -1;
     private void pursuit(float speed)

@@ -12,7 +12,7 @@ public class AiController : MonoBehaviour
     Rigidbody2D rigidbody2d; // new added to remove warning
 
     float timer;
-    public Vector2Int playerLocation;
+    public Vector2Int playerLocation = new Vector2Int(-1000,-1000);
     public AiPath aiPath { get; set; }
     void Start()
     {
@@ -45,7 +45,7 @@ public class AiController : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if(playerLocation != null)
+        if(playerLocation.x != -1000)
             aiPath.Move(speed * Time.deltaTime, playerLocation);
         else
             aiPath.Move(speed * Time.deltaTime);
